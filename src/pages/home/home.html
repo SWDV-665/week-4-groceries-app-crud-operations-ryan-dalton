@@ -5,8 +5,8 @@
 </ion-header>
 
 <ion-content padding>
-  <h4 text-center *ngIf="loadItems().length === 0">
-    No items available on the list! Click to add some...
+  <h4 class="no-item" text-center *ngIf="loadItems().length === 0">
+    No items are on the list! Try adding some...
   </h4>
 
   <h2>My Grocery / Survival List</h2>
