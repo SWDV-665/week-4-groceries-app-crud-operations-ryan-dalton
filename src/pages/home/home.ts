@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { NavController } from 'ionic-angular';
+import { GroceriesServiceProvider } from '../../providers/groceries-service/groceries-service';
 import { ToastController } from 'ionic-angular';
 import { AlertController } from 'ionic-angular';
 import { ItemSliding } from 'ionic-angular';
@@ -12,33 +13,14 @@ import { ItemSliding } from 'ionic-angular';
 export class HomePage {
 
   title = "Grocery List";
-  items = [
-    {
-      name: "Toilet Paper",
-      quantity: "100",
-      blurb: "You don't want to run out of this.",
-      image: "assets/imgs/tp.jpg"
-
-    },
-    {
-      name: "Water Bottles",
-      quantity: "200",
-      blurb: "Great on a hot day.",
-      image: "assets/imgs/bottle.jpg"
-
-    },
-    {
-      name: "Tylenol",
-      quantity: "10",
-      blurb: "Keeps the fever down.",
-      image: "assets/imgs/medicine.jpg"
-
-    }
-  ]
 
 
-  constructor(public navCtrl: NavController, public toastCtrl: ToastController, public alertCtrl: AlertController) {
+  constructor(public navCtrl: NavController, public toastCtrl: ToastController, public dataService: GroceriesServiceProvider, public alertCtrl: AlertController) {
 
+  }
+
+  loadItems(){
+    return this.dataService.getItems();
   }
 
   removeItem(item, index){
@@ -48,7 +30,19 @@ export class HomePage {
       duration: 3000
     });
     toast.present();
-    this.items.splice(index, 1);
+    this.dataService.removeItem(index);
+  }
+
+  editItem(item, index){
+    console.log("Edit Item: ", item, index);
+    const toast = this.toastCtrl.create({
+      message: 'Editing Item - ' + item.name,
+      duration: 3000
+    });
+    toast.present();
+    console.log("Editing item: ", item);
+    this.showEditItemPrompt(item, index);
+    
   }
 
   addItem(){
@@ -57,6 +51,7 @@ export class HomePage {
 
   }
 
+  
   showAddItemPrompt() {
     const prompt = this.alertCtrl.create({
       title: 'Add Item',
@@ -87,7 +82,53 @@ export class HomePage {
           handler: item => {
             console.log('Add clicked for', item);
             item.image = 'assets/imgs/customitem.jpg';
-            this.items.push(item);
+            this.dataService.addItem(item);
+          }
+        }
+      ]
+    });
+    prompt.present();
+  }
+
+
+  showEditItemPrompt(item, index) {
+    //save previousImage as the item's image (moved over after inputs take place)
+    var previousImage = item.image
+    const prompt = this.alertCtrl.create({
+      title: 'Edit Item',
+      message: "Enter edit name and quantity of the item",
+      inputs: [
+        {
+          name: 'name',
+          value: item.name
+          
+        },
+        {
+          name: 'quantity',
+          placeholder: 'Quantity',
+          value: item.quantity
+        },
+        {
+          name: 'blurb',
+          placeholder: 'Notes etc. (optional)',
+          value: item.blurb
+        },
+      ],
+      buttons: [
+        {
+          text: 'Cancel',
+          handler: data => {
+            console.log('Cancelled add item');
+          }
+        },
+        {
+          text: 'Save',
+          handler: item => {
+            //add a line here so that our image doesn't change when we edit an item 
+            item.image = previousImage;
+            console.log('Save clicked for', item);
+            this.dataService.editItem(item, index);
+            
           }
         }
       ]
@@ -111,4 +152,10 @@ export class HomePage {
   }
 
 }
+
+
+
+
+
+
 
